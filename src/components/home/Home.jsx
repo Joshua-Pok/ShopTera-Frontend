@@ -15,7 +15,7 @@ const Home = () => {
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]); //products returned from search
     const [errorMessage, setErrorMessage] = useState(null);
-    const {searchQuery} = useSelector((state) => state.search)
+    const {searchQuery, selectedCategory} = useSelector((state) => state.search)
     const [currentPage, setCurrentPage] = useState([]);
     const itemsPerPage = 10;
 
@@ -37,11 +37,13 @@ const Home = () => {
 
     useEffect(() => {
         const results = products.filter((product) => {
-            const matchesQuery = products.name.toLowerCase().includes(searchQuery.toLowerCase())
-            return matchesQuery;
+            const matchesQuery = products.name.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesCategory = selectedCategory === "all" ||
+                product.category.name.toLowerCase().includes(selectedCategory.toLowerCase());
+            return matchesQuery && matchesCategory;
         })
         setFilteredProducts(results);
-    }, [searchQuery, products])
+    }, [searchQuery, selectedCategory, products])
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
     const indexOfLastProduct = currentPage * itemsPerPage;
