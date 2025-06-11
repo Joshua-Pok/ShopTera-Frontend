@@ -5,15 +5,43 @@ import Paginator from '../common/Paginator.jsx'
 import { Card } from 'react-bootstrap'
 import {Link} from 'react-router-dom'
 import ProductImage from "../utils/ProductImage.jsx";
+import {useEffect} from "react";
+import {getDistinctProductsByName} from "../service/ProductService.js";
+import {toast, ToastContainer} from 'react-toastify'
+import {useSelector} from "react-redux";
 
 const Home = () => {
 
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]); //products returned from search
-
-
+    const [errorMessage, setErrorMessage] = useState(null);
+    const {searchQuery} = useSelector((state) => state.search)
     const [currentPage, setCurrentPage] = useState([]);
     const itemsPerPage = 10;
+
+    useEffect(() => {
+        const getProducts = async () => {
+            try{
+                const response = await getDistinctProductsByName();
+                setProducts(response.data);
+            }catch(err){
+                setErrorMessage(err.message);
+                toast.error(err.message);
+            }
+        }
+
+        getProducts();
+    }, [])
+
+
+
+    useEffect(() => {
+        const results = products.filter((product) => {
+            const matchesQuery = products.name.toLowerCase().includes(searchQuery.toLowerCase())
+            return matchesQuery;
+        })
+        setFilteredProducts(results);
+    }, [searchQuery, products])
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
     const indexOfLastProduct = currentPage * itemsPerPage;
@@ -27,7 +55,8 @@ const Home = () => {
         <>
             <Hero></Hero>
             <div className="d-flex flex-wrap justify-content-center p-5">
-            {products.map((product) => (
+                <ToastContainer></ToastContainer>
+            {currentProducts && currentProducts.map((product) => (
                 <Card key={product.id} className="home-product-card">
                     <Link to={"#"} className="link"><div className="image-container">
                         {product.images.length > 0 && (
