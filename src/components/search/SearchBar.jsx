@@ -2,14 +2,25 @@ import React from 'react'
 import {useDispatch, useSelector} from "react-redux";
 import { useEffect } from "react";
 import { getAllCategories } from "../../store/features/categorySlice.js";
+import { setSearchQuery, setSelectedCategory, clearFilters } from "../../store/features/searchSlice.js";
 
-const SearchBar = ({value, onChange, onCategoryChange }) => {
+const SearchBar = () => {
     const dispatch = useDispatch();
     const categories = useSelector((state) => state.category.categories);
 
     const handleCategoryChange = (e) => {
-        onCategoryChange(e.target.value);
+        dispatch(setSelectedCategory(e.target.value))
     }
+
+    const handleClearFilters = () => {
+        dispatch(clearFilters());
+    }
+
+    const handleSearchQueryChange = (e) => {
+        dispatch(setSearchQuery(e.target.value));
+    }
+
+
     useEffect(() => {
         dispatch(getAllCategories())
 
@@ -26,8 +37,8 @@ const SearchBar = ({value, onChange, onCategoryChange }) => {
                 ))}
             </select>
             <input type="text" className="form-control" placeholder="Search for products(eg: watch)"
-            value={value} onChange={onChange}/>
-            <button className="search-button">Clear Filter</button>
+            value={value} onChange={handleSearchQueryChange} />
+            <button className="search-button" onClick={handleClearFilters}>Clear Filter</button>
         </div>
     )
 }
